@@ -1,0 +1,62 @@
+import java.util.Random;
+
+public class IntersectionSimulator {
+    private static final int SIMULATION_TIME_SECONDS = 60;
+
+    public static void main(String[] args) {
+        TrafficLight trafficLight = new TrafficLight();
+        Random rand = new Random();
+
+        // Create cars with random speeds and directions
+        Car[] cars = new Car[20];
+        for (int i = 0; i < cars.length; i++) {
+            int speed = rand.nextInt(60) + 20; // Speed between 20 and 80 km/h
+            String[] directions = {"N", "S", "E", "W"};
+            String direction = directions[rand.nextInt(directions.length)];
+            cars[i] = new Car(speed, direction);
+        }
+
+        // Simulate the intersection for a fixed number of seconds
+        for (int time = 0; time < SIMULATION_TIME_SECONDS; time++) {
+            System.out.println("Time: " + time + " seconds");
+
+            // Randomly set the traffic light to green for one direction
+            int randomDirectionIndex = rand.nextInt(4);
+            String[] directions = {"N", "S", "E", "W"};
+            String greenDirection = directions[randomDirectionIndex];
+            System.out.println("Traffic light is green for: " + greenDirection);
+            trafficLight.setGreen(true);
+
+            // Simulate car movements and update traffic light
+            for (int i = 0; i < cars.length; i++) {
+                Car car = cars[i];
+                if (car.getDirection().equals(greenDirection)) {
+                    System.out.println("Car going " + car.getDirection() + " with speed " + car.getSpeed() + " km/h");
+                    car.move(); // Move the car based on its speed and direction
+                } else {
+                    System.out.println("Car waiting at red light: " + car.getDirection());
+                }
+
+                // Check for collisions with other cars
+                for (int j = 0; j < cars.length; j++) {
+                    if (i != j && cars[i].getDirection().equals(cars[j].getDirection())) {
+                        if (Math.abs(cars[i].getPosition() - cars[j].getPosition()) < 10) {
+                            System.out.println("Collision detected between cars " + i + " and " + j);
+                            cars[i].brake(cars[i].getSpeed()); // Car i brakes
+                            cars[j].brake(cars[j].getSpeed()); // Car j brakes
+                        }
+                    }
+                }
+            }
+
+            trafficLight.setGreen(false); // Set the traffic light back to red
+            System.out.println("------------------");
+
+            try {
+                Thread.sleep(1000); // Wait for 1 second in the simulation
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
